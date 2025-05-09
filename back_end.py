@@ -36,9 +36,9 @@ def create_overlay(data):
     c.drawString(205, 546, f"{data['first_name']}")
     c.drawString(52, 546, f"{data['last_name']}")
     c.drawString(349, 546, f"{data['middle_name']}")
-    c.drawString(431, 548, f"{spaced_date(data['date_of_birth'])}")
+    c.drawString(429, 546, f"{spaced_date(data['date_of_birth'])}")
     c.drawString(210, 665, f"{spaced_date(data['classroom_date_entry'])}")
-    c.drawString(490, 665, f"{spaced_date(data['online_date_entry'])}")
+    c.drawString(491, 665, f"{spaced_date(data['online_date_entry'])}")
     c.drawString(380, 624, f"{data['road_rule']}")
     c.drawString(480, 624, f"{data['road_sign']}")
     c.drawString(430, 484, f"{data['school_name']}")
@@ -68,11 +68,7 @@ def generate_doc(filling):
     counter_file = 'counter.txt'
     current_number = load_current_number(counter_file)
     control_number = "DEE " + digit_control(current_number)
-
-    template_path = filedialog.askopenfilename(title="Choose a base PDF template", filetypes=[("PDF files", "*.pdf")])
-    if not template_path:
-        return
-
+    template_path = "Template/ADEE-1317-texas-adult-driver-education-certificate-template.pdf"
     output_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF files", "*.pdf")])
     if not output_path:
         return
