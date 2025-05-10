@@ -38,7 +38,7 @@ def save_submission(data):
             school_name, tdlr, educator_number, date_issued
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
-        data["first_name"], data["last_name"], data["middle_name"], data["date_of_birth"],
+        data["control_number"],data["first_name"], data["last_name"], data["middle_name"], data["date_of_birth"],
         data["classroom_date"], data["online_date"], int(data["road_rule"]), int(data["road_sign"]),
         data["school_name"], data["tdlr"], data["educator_number"], data["date_issued"]
     ))
