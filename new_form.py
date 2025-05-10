@@ -62,7 +62,7 @@ def on_submit():
 
 # function to create label+entry
 def create_entry(label, row, field_key, default_text="", parent_frame=None):
-    ttk.Label(parent_frame, text=label).grid(row=row, column=0, sticky="e", padx=5, pady=5)
+    ttk.Label(parent_frame, text=label, font=("-size", 12)).grid(row=row, column=0, sticky="e", padx=5, pady=5)
     entry = ttk.Entry(parent_frame, width=30)
     entry.insert(0, default_text)
     entry.grid(row=row, column=1, sticky="ew", padx=5, pady=(5,10))
@@ -84,7 +84,7 @@ def launch_form_input(form_input_frame):
     current_number = back_end.load_current_number(counter_file)
     control_number = "DEE " + back_end.digit_control(current_number)
 
-    ttk.Label(widgets_frame, text="Control Number:").grid(row=13, column=0, padx=5, pady=(0, 10), sticky="e")
+    ttk.Label(widgets_frame, text="Control Number:",  font=("-size", 12)).grid(row=13, column=0, padx=5, pady=(0, 10), sticky="e")
     control_entry = ttk.Entry(widgets_frame, width=30)
     control_entry.insert(0, control_number)
     control_entry.grid(row=13, column=1, padx=5, pady=(0, 10), sticky="ew")
@@ -108,5 +108,5 @@ def launch_form_input(form_input_frame):
     ]):
         create_entry(label, i, field, parent_frame=widgets_frame)
 
-    generate_button = ttk.Button(form_input_frame, text="Generate Document", command=on_submit)
+    generate_button = ttk.Button(form_input_frame, text="Generate Document", style="Accent.TButton", command=on_submit)
     generate_button.grid(row=12, column=0, columnspan=2, pady=10, sticky="n")

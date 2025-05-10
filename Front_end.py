@@ -31,7 +31,7 @@ database.init_db()
 # --- Setup Main Window ---
 root = tk.Tk()
 root.tk.call("source", "theme/azure.tcl")
-root.tk.call("set_theme", "dark")
+root.tk.call("set_theme", "light")
 root.title("Document Filler")
 root.geometry("800x800")
 root.minsize(400, 400)
@@ -53,7 +53,7 @@ top_info_frame.grid_columnconfigure(0, weight=1)
 # Current Date
 today = datetime.now()
 formatted_date = today.strftime("%m/%d/%Y")
-ttk.Label(top_info_frame, text="Today's Date:").grid(row=0, column=0, padx=5, pady=(0, 5), sticky="e")
+ttk.Label(top_info_frame, text="Today's Date:",  font=("-size", 13)).grid(row=0, column=0, padx=5, pady=(0, 5), sticky="e")
 ttk.Label(
     top_info_frame,
     text=formatted_date,
@@ -63,7 +63,7 @@ ttk.Label(
 
 # Monthly Count
 monthly_total = database.get_current_month_submission_count()
-ttk.Label(top_info_frame, text="Forms Submitted This Month:").grid(row=0, column=3, padx=5, pady=5, sticky="e")
+ttk.Label(top_info_frame, text="Forms Submitted This Month:",  font=("-size", 13)).grid(row=0, column=3, padx=5, pady=5, sticky="e")
 ttk.Label(
     top_info_frame,
     text=monthly_total,
@@ -82,7 +82,7 @@ separator.grid(row=1, column=0,columnspan=4, padx=(20, 10), pady=10, sticky="ew"
 button_frame = ttk.Frame(landing_frame)
 button_frame.grid(row=1, column=0, sticky="n")
 
-ttk.Label(button_frame, text="Choose One Option Below").grid(
+ttk.Label(button_frame, text="Choose One Option Below",  font=("-size", 13)).grid(
     row=0, column=0, columnspan=2, pady=(0, 10)
 )
 

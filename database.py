@@ -68,3 +68,27 @@ def get_current_month_submission_count():
     count = cursor.fetchone()[0]
     conn.close()
     return count
+
+def search_submissions(name_query="", month_query="", year_query=""):
+    conn = sqlite3.connect("submissions.db")
+    cursor = conn.cursor()
+
+    query = "SELECT * FROM submissions WHERE 1=1"
+    params = []
+
+    if name_query:
+        query += " AND (first_name LIKE ? OR last_name LIKE ?)"
+        params.extend([f"%{name_query}%", f"%{name_query}%"])
+
+    if month_query:
+        query += " AND strftime('%m', generated_at) = ?"
+        params.append(month_query.zfill(2))  # Ensure 2-digit format
+
+    if year_query:
+        query += " AND strftime('%Y', generated_at) = ?"
+        params.append(year_query.zfill(4))  # Ensure 4-digit format
+    query += " ORDER BY generated_at DESC"
+    cursor.execute(query, tuple(params))
+    results = cursor.fetchall()
+    conn.close()
+    return results
