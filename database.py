@@ -1,5 +1,5 @@
 import sqlite3
-
+from datetime import datetime
 DB_NAME = "submissions.db"
 
 def init_db():
@@ -54,3 +54,17 @@ def get_all_submissions():
     rows = cursor.fetchall()
     conn.close()
     return rows
+
+def get_current_month_submission_count():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    # Match current month in YYYY-MM format
+    current_month = datetime.now().strftime("%Y-%m")
+    cursor.execute("""
+        SELECT COUNT(*) FROM submissions
+        WHERE strftime('%Y-%m', generated_at) = ?
+    """, (current_month,))
+    count = cursor.fetchone()[0]
+    conn.close()
+    return count
