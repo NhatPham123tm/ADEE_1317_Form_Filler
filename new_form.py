@@ -42,11 +42,8 @@ def on_submit():
         messagebox.showerror("Input Error", "\n".join(validation_errors))
     else:
         # Save to DB
-        counter_file = 'counter.txt'
-        current_number = back_end.load_current_number(counter_file)
-        control_number = "DEE " + back_end.digit_control(current_number)
         database.save_submission({
-            "control_number": control_number,
+            "control_number": Filling['control_number'].get(),
             "first_name": Filling['first_name_entry'].get(),
             "last_name": Filling['last_name_entry'].get(),
             "middle_name": Filling['middle_name_entry'].get(),
@@ -68,7 +65,7 @@ def create_entry(label, row, field_key, default_text="", parent_frame=None):
     ttk.Label(parent_frame, text=label).grid(row=row, column=0, sticky="e", padx=5, pady=5)
     entry = ttk.Entry(parent_frame, width=30)
     entry.insert(0, default_text)
-    entry.grid(row=row, column=1, sticky="ew", padx=5, pady=5)
+    entry.grid(row=row, column=1, sticky="ew", padx=5, pady=(5,10))
     Filling[field_key] = entry
 
 # Frame: Form Input
@@ -82,19 +79,34 @@ def launch_form_input(form_input_frame):
     widgets_frame.grid(row=0, column=0, sticky="nsew")
     widgets_frame.columnconfigure(1, weight=1)
 
+    # Control number label and entry
+    counter_file = 'counter.txt'
+    current_number = back_end.load_current_number(counter_file)
+    control_number = "DEE " + back_end.digit_control(current_number)
+
+    ttk.Label(widgets_frame, text="Control Number:").grid(row=13, column=0, padx=5, pady=(0, 10), sticky="e")
+    control_entry = ttk.Entry(widgets_frame, width=30)
+    control_entry.insert(0, control_number)
+    control_entry.grid(row=13, column=1, padx=5, pady=(0, 10), sticky="ew")
+
+    Filling["control_number"] = control_entry  # Save for later use in on_submit
+
     # Create entries inside widgets_frame
-    create_entry("First Name:", 0, 'first_name_entry', parent_frame=widgets_frame)
-    create_entry("Last Name:", 1, 'last_name_entry', parent_frame=widgets_frame)
-    create_entry("Middle Name:", 2, 'middle_name_entry', parent_frame=widgets_frame)
-    create_entry("Date of Birth:", 3, 'date_of_birth_entry', parent_frame=widgets_frame)
-    create_entry("6h Classroom Course Completion Date:", 4, 'classroom_date_entry', parent_frame=widgets_frame)
-    create_entry("6h Online Course Completion Date:", 5, 'online_date_entry', parent_frame=widgets_frame)
-    create_entry("Road Rule Pts:", 6, 'road_rule_entry', parent_frame=widgets_frame)
-    create_entry("Road Sign Pts:", 7, 'road_sign_entry', parent_frame=widgets_frame)
-    create_entry("School Name:", 8, 'school_name_entry', parent_frame=widgets_frame)
-    create_entry("TDLR Number:", 9, 'TDLR_entry', parent_frame=widgets_frame)
-    create_entry("Driver Education School Number:", 10, 'driver_school_number_entry', parent_frame=widgets_frame)
-    create_entry("Date Issued:", 11, 'date_issued_entry', parent_frame=widgets_frame)
+    for i, (label, field) in enumerate([
+        ("First Name:", 'first_name_entry'),
+        ("Last Name:", 'last_name_entry'),
+        ("Middle Name:", 'middle_name_entry'),
+        ("Date of Birth:", 'date_of_birth_entry'),
+        ("6h Classroom Course Completion Date:", 'classroom_date_entry'),
+        ("6h Online Course Completion Date:", 'online_date_entry'),
+        ("Road Rule Pts:", 'road_rule_entry'),
+        ("Road Sign Pts:", 'road_sign_entry'),
+        ("School Name:", 'school_name_entry'),
+        ("TDLR Number:", 'TDLR_entry'),
+        ("Driver Education School Number:", 'driver_school_number_entry'),
+        ("Date Issued:", 'date_issued_entry'),
+    ]):
+        create_entry(label, i, field, parent_frame=widgets_frame)
 
     generate_button = ttk.Button(form_input_frame, text="Generate Document", command=on_submit)
-    generate_button.grid(row=12, column=0, columnspan=2, pady=15)
+    generate_button.grid(row=12, column=0, columnspan=2, pady=10, sticky="n")

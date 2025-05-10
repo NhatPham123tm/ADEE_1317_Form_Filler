@@ -31,16 +31,16 @@ database.init_db()
 # --- Setup Main Window ---
 root = tk.Tk()
 root.tk.call("source", "theme/azure.tcl")
-root.tk.call("set_theme", "light")
+root.tk.call("set_theme", "dark")
 root.title("Document Filler")
-root.geometry("600x600")
+root.geometry("800x800")
 root.minsize(400, 400)
 root.grid_rowconfigure(0, weight=1)
 root.grid_columnconfigure(0, weight=1)
 
 # --- Landing Frame ---
 landing_frame = ttk.Frame(root, padding=10)
-landing_frame.grid(row=0, column=0, sticky="nsew")
+landing_frame.grid(row=0, column=0, padx=20, pady=20)
 
 for i in range(3):
     landing_frame.grid_rowconfigure(i, weight=1)
@@ -50,7 +50,7 @@ ttk.Label(landing_frame, text="Choose One Option Below").grid(
     row=0, column=0, columnspan=2, pady=10, sticky="n"
 )
 
-ttk.Button(landing_frame, text="Start New Form", width=20,
+ttk.Button(landing_frame, text="Start New Form",style="Accent.TButton", width=20,
            command=lambda: frame_transit('new', root)).grid(row=1, column=0, columnspan=2, sticky="n", pady=5)
 
 ttk.Button(landing_frame, text="View History", width=20,
