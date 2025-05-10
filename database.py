@@ -9,6 +9,7 @@ def init_db():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS submissions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            control_number TEXT,
             first_name TEXT,
             last_name TEXT,
             middle_name TEXT,
@@ -32,7 +33,7 @@ def save_submission(data):
     cursor = conn.cursor()
     cursor.execute("""
         INSERT INTO submissions (
-            first_name, last_name, middle_name, date_of_birth,
+            control_number, first_name, last_name, middle_name, date_of_birth,
             classroom_date, online_date, road_rule, road_sign,
             school_name, tdlr, educator_number, date_issued
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -43,3 +44,13 @@ def save_submission(data):
     ))
     conn.commit()
     conn.close()
+
+def get_all_submissions():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("""SELECT * FROM submissions
+                    GROUP BY DATE(generated_at)
+                    ORDER BY DATE(generated_at) DESC """)
+    rows = cursor.fetchall()
+    conn.close()
+    return rows

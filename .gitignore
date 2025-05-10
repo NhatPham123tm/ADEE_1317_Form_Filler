@@ -177,3 +177,7 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
+__pycache__/back_end.cpython-310.pyc
+counter.txt
+debug_grid_output.pdf
+paracheck.py
