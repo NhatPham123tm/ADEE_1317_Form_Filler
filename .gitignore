@@ -183,3 +183,4 @@ debug_grid_output.pdf
 paracheck.py
 submissions.db
 counter.txt
+/output
