@@ -49,9 +49,9 @@ def get_all_submissions():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("""SELECT * FROM submissions
-                    GROUP BY DATE(generated_at)
-                    ORDER BY DATE(generated_at) DESC """)
+                     ORDER BY datetime(generated_at) DESC""")
     rows = cursor.fetchall()
+    print(rows)
     conn.close()
     return rows
 

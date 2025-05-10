@@ -1,6 +1,9 @@
 from tkinter import ttk
 import database
 import tkinter as tk
+from tkinter import messagebox
+import back_end
+
 def launch_history_viewer(history_frame):
     def perform_search():
         name = name_var.get().strip()
@@ -18,7 +21,7 @@ def launch_history_viewer(history_frame):
     records = database.get_all_submissions()
 
     columns = (
-        "ID", "First Name", "Last Name", "Middle Name", "DOB", "Classroom Date",
+        "ID", "Control Number", "First Name", "Last Name", "Middle Name", "DOB", "Classroom Date",
         "Online Date", "Road Rule", "Road Sign", "School", "TDLR", "Educator No",
         "Issued Date", "Generated At"
     )
@@ -68,3 +71,22 @@ def launch_history_viewer(history_frame):
 
     history_frame.grid_rowconfigure(1, weight=1)
     history_frame.grid_columnconfigure(0, weight=1)
+
+    def print_selected_pdf():
+        selected = tree.focus()
+        if not selected:
+            messagebox.showwarning("No selection", "Please select a record first.")
+            return
+
+        selected_values = tree.item(selected, "values")
+        form_id = selected_values[0]  # Assuming first column is ID
+
+        try:
+            # Call your backend PDF function
+            back_end.generate_pdf_by_id(form_id)
+            messagebox.showinfo("PDF Generated", f"PDF generated for ID {form_id}")
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not generate PDF: {e}")
+    
+    print_btn = ttk.Button(history_frame, text="Print PDF for Selected", command=print_selected_pdf)
+    print_btn.grid(row=3, column=0, columnspan=2, sticky="ew", padx=10, pady=(5, 10))

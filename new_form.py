@@ -41,24 +41,28 @@ def on_submit():
     if validation_errors:
         messagebox.showerror("Input Error", "\n".join(validation_errors))
     else:
-        # Save to DB
-        database.save_submission({
-            "control_number": Filling['control_number'].get(),
-            "first_name": Filling['first_name_entry'].get(),
-            "last_name": Filling['last_name_entry'].get(),
-            "middle_name": Filling['middle_name_entry'].get(),
-            "date_of_birth": Filling['date_of_birth_entry'].get(),
-            "classroom_date": Filling['classroom_date_entry'].get(),
-            "online_date": Filling['online_date_entry'].get(),
-            "road_rule": Filling['road_rule_entry'].get(),
-            "road_sign": Filling['road_sign_entry'].get(),
-            "school_name": Filling['school_name_entry'].get(),
-            "tdlr": Filling['TDLR_entry'].get(),
-            "educator_number": Filling['driver_school_number_entry'].get(),
-            "date_issued": Filling['date_issued_entry'].get(),
-        })
-
-        back_end.generate_doc(Filling)
+        try:
+            # Save to DB
+            database.save_submission({
+                "control_number": Filling['control_number'].get(),
+                "first_name": Filling['first_name_entry'].get(),
+                "last_name": Filling['last_name_entry'].get(),
+                "middle_name": Filling['middle_name_entry'].get(),
+                "date_of_birth": Filling['date_of_birth_entry'].get(),
+                "classroom_date": Filling['classroom_date_entry'].get(),
+                "online_date": Filling['online_date_entry'].get(),
+                "road_rule": Filling['road_rule_entry'].get(),
+                "road_sign": Filling['road_sign_entry'].get(),
+                "school_name": Filling['school_name_entry'].get(),
+                "tdlr": Filling['TDLR_entry'].get(),
+                "educator_number": Filling['driver_school_number_entry'].get(),
+                "date_issued": Filling['date_issued_entry'].get(),
+            })
+            back_end.save_next_number('counter.txt', int(Filling['control_number'].get().split()[1]))
+            back_end.generate_doc(Filling)
+            messagebox.showinfo("Success", "Document generated successfully!")
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {str(e)}")
 
 # function to create label+entry
 def create_entry(label, row, field_key, default_text="", parent_frame=None):
