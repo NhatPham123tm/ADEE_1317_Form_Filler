@@ -66,6 +66,16 @@ def launch_history_viewer(history_frame):
     tree.configure(xscrollcommand=h_scroll.set)
 
     tree.grid(row=1, column=0, sticky="nsew", padx=(10, 0), pady=(5, 5))
+
+    # Make the print button change style when a row is selected
+    def on_row_select(event):
+        if tree.selection():
+            print_btn.configure(style="Accent.TButton")
+        else:
+            print_btn.configure(style="")
+
+    tree.bind("<<TreeviewSelect>>", on_row_select)
+
     scrollbar.grid(row=1, column=1, sticky="ns", pady=10)
     h_scroll.grid(row=2, column=0, columnspan=2, sticky="ew", padx=10)
 

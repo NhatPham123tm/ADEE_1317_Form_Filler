@@ -56,12 +56,11 @@ def create_overlay(data):
     c.drawString(255, 458, f"{data['educator']}")
     c.drawString(450, 458, f"{data['date']}")
     c.drawString(500, 742, f"{data['control_number']}")
-
-    if data.get("classroom_date_entry", "").strip():
+    if str(data.get("classroom_date_entry", "")).strip():
         draw_checkbox(c, 23, 666, checked=True)
-    if data.get("online_date_entry", "").strip():
+    if str(data.get("online_date_entry", "")).strip():
         draw_checkbox(c, 323, 666, checked=True)
-    if data.get("road_rule", "").strip() or data.get("road_sign", "").strip():
+    if str(data.get("road_rule", "")).strip() or str(data.get("road_sign", "")).strip():
         draw_checkbox(c, 23, 634, checked=True)
 
     draw_checkbox(c, 23, 708, data.get("driver_ed"))
@@ -117,7 +116,6 @@ def generate_doc(filling, form_id=None):
     output_path = get_output_path(filling)
     if not output_path:
         return
-
     overlay_data = {
         "first_name": get_val(filling, 'first_name_entry'),
         "last_name": get_val(filling, 'last_name_entry'),
@@ -132,16 +130,16 @@ def generate_doc(filling, form_id=None):
         "educator": get_val(filling, 'driver_school_number_entry'),
         "date": get_val(filling, 'date_issued_entry'),
         "control_number": get_val(filling, 'control_number'),
-        "driver_ed": filling["driver_ed"].get(),
-        "private_school": filling["private_school"].get(),
-        "duplicate": filling["duplicate"].get(),
-        "public_school": filling["public_school"].get(),
-        "service_center": filling["service_center"].get(),
-        "college": filling["college"].get(),
-        "At_DPS": filling["At_DPS"].get(),
-        "Vision_examination": filling["Vision_examination"].get(),
-        "Male": filling["Male"].get(),
-        "Female": filling["Female"].get(),                                   
+        "driver_ed": get_val(filling, 'driver_ed'),
+        "private_school": get_val(filling, 'private_school'),
+        "duplicate": get_val(filling, 'duplicate'),
+        "public_school": get_val(filling, 'public_school'),
+        "service_center": get_val(filling, 'service_center'),
+        "college": get_val(filling, 'college'),
+        "At_DPS": get_val(filling, 'At_DPS'),
+        "Vision_examination": get_val(filling, 'Vision_examination'),
+        "Male": get_val(filling, 'Male'),
+        "Female": get_val(filling, 'Female'),                                 
     }
 
     merge_overlay(template_path, output_path, overlay_data)
@@ -164,9 +162,10 @@ def generate_pdf_by_id(form_id):
 
     # Map row to dictionary
     fields = [
-        "id","control_number", "first_name_entry", "last_name_entry", "middle_name_entry", "date_of_birth_entry",
+        "id","control_number", "first_name_entry", "last_name_entry", "middle_name_entry","male","female","date_of_birth_entry",
         "classroom_date_entry", "online_date_entry", "road_rule_entry", "road_sign_entry", "school_name_entry",
-        "TDLR_entry", "driver_school_number_entry", "date_issued_entry", "generated_at"
+        "TDLR_entry", "driver_school_number_entry", "date_issued_entry","driver_ed", "private_school","duplicate",
+        "public_school", "service_center", "college", "At_DPS", "Vision_examination", "generated_at"
     ]
     data = dict(zip(fields, row))
     generate_doc(data, form_id=form_id)
