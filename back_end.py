@@ -34,6 +34,10 @@ def get_val(filling, key):
     value = filling.get(key)
     return value.get() if hasattr(value, 'get') else value
 
+def draw_checkbox(c, x, y, checked):
+    if checked:
+        c.drawString(x, y, "X")  
+
 def create_overlay(data):
     packet = BytesIO()
     c = canvas.Canvas(packet, pagesize=letter)
@@ -45,14 +49,31 @@ def create_overlay(data):
     c.drawString(429, 546, f"{spaced_date(data['date_of_birth'])}")
     c.drawString(210, 665, f"{spaced_date(data['classroom_date_entry'])}")
     c.drawString(493, 665, f"{spaced_date(data['online_date_entry'])}")
-    c.drawString(380, 624, f"{data['road_rule']}")
-    c.drawString(480, 624, f"{data['road_sign']}")
+    c.drawString(380, 623, f"{data['road_rule']}")
+    c.drawString(480, 623, f"{data['road_sign']}")
     c.drawString(430, 484, f"{data['school_name']}")
     c.drawString(280, 484, f"{data['tdlr']}")
     c.drawString(255, 458, f"{data['educator']}")
     c.drawString(450, 458, f"{data['date']}")
     c.drawString(500, 742, f"{data['control_number']}")
 
+    if data.get("classroom_date_entry", "").strip():
+        draw_checkbox(c, 23, 666, checked=True)
+    if data.get("online_date_entry", "").strip():
+        draw_checkbox(c, 323, 666, checked=True)
+    if data.get("road_rule", "").strip() or data.get("road_sign", "").strip():
+        draw_checkbox(c, 23, 634, checked=True)
+
+    draw_checkbox(c, 23, 708, data.get("driver_ed"))
+    draw_checkbox(c, 172, 708, data.get("private_school"))
+    draw_checkbox(c, 328, 708, data.get("duplicate"))
+    draw_checkbox(c, 23, 692, data.get("public_school"))
+    draw_checkbox(c, 124, 692, data.get("service_center"))
+    draw_checkbox(c, 277, 692, data.get("college"))
+    draw_checkbox(c, 23, 597, data.get("At_DPS"))
+    draw_checkbox(c, 23, 581, data.get("Vision_examination"))
+    draw_checkbox(c, 505, 545, data.get("Male"))
+    draw_checkbox(c, 546, 545, data.get("Female"))
     c.save()
     packet.seek(0)
     return PdfReader(packet)
@@ -111,6 +132,16 @@ def generate_doc(filling, form_id=None):
         "educator": get_val(filling, 'driver_school_number_entry'),
         "date": get_val(filling, 'date_issued_entry'),
         "control_number": get_val(filling, 'control_number'),
+        "driver_ed": filling["driver_ed"].get(),
+        "private_school": filling["private_school"].get(),
+        "duplicate": filling["duplicate"].get(),
+        "public_school": filling["public_school"].get(),
+        "service_center": filling["service_center"].get(),
+        "college": filling["college"].get(),
+        "At_DPS": filling["At_DPS"].get(),
+        "Vision_examination": filling["Vision_examination"].get(),
+        "Male": filling["Male"].get(),
+        "Female": filling["Female"].get(),                                   
     }
 
     merge_overlay(template_path, output_path, overlay_data)
@@ -119,6 +150,7 @@ def generate_doc(filling, form_id=None):
         save_next_number(counter_file, current_number + 1)
 
     messagebox.showinfo("Success", f"PDF generated and saved to:\n{output_path}")
+    webbrowser.open(output_path)
 
 def generate_pdf_by_id(form_id):
     conn = sqlite3.connect("submissions.db")
