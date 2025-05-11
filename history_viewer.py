@@ -3,7 +3,28 @@ import database
 import tkinter as tk
 from tkinter import messagebox
 import back_end
+from datetime import datetime
+def treeview_sort_column(tv, col, reverse):
+    data_list = [(tv.set(k, col), k) for k in tv.get_children('')]
 
+    # Try to convert to int or date for proper sorting
+    def try_convert(val):
+        try:
+            return int(val)
+        except ValueError:
+            try:
+                return datetime.strptime(val, "%m/%d/%Y")
+            except:
+                return val.lower()
+
+    data_list.sort(key=lambda t: try_convert(t[0]), reverse=reverse)
+
+    for index, (val, k) in enumerate(data_list):
+        tv.move(k, '', index)
+
+    # Reverse sort next time
+    tv.heading(col, command=lambda: treeview_sort_column(tv, col, not reverse))
+    
 def launch_history_viewer(history_frame):
     records = database.get_all_submissions()
     today_records = database.get_today_submissions()
@@ -24,7 +45,7 @@ def launch_history_viewer(history_frame):
 
     today_tree = ttk.Treeview(tab_today, columns=columns, show='headings')
     for col in columns:
-        today_tree.heading(col, text=col)
+        today_tree.heading(col, text=col, command=lambda _col=col: treeview_sort_column(today_tree, _col, False))
         today_tree.column(col, anchor="center", width=100)
     for row in today_records:
         today_tree.insert("", "end", values=row)
@@ -69,7 +90,7 @@ def launch_history_viewer(history_frame):
 
     tree = ttk.Treeview(tab_all, columns=columns, show='headings')
     for col in columns:
-        tree.heading(col, text=col)
+        tree.heading(col, text=col, command=lambda _col=col: treeview_sort_column(tree, _col, False))
         tree.column(col, anchor="center", width=100)
     for row in records:
         tree.insert("", "end", values=row)

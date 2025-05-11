@@ -7,19 +7,33 @@ from datetime import datetime
 # Hold input fields
 Filling = {}
 
+
 def validate_inputs():
     errors = []
 
+    control_number = Filling['control_number'].get().strip()
+
+    if database.is_control_number_exists(control_number):
+        latest = database.get_latest_number()
+        next_available = "DEE " + back_end.digit_control(latest + 1)
+        proceed = messagebox.askyesno(
+            "Duplicate Control Number",
+            f"The control number '{control_number}' already exists.\n"
+            f"Suggested next available: {next_available}\n\n"
+            "Do you want to continue anyway?"
+        )
+        if not proceed:
+            return ["Submission cancelled due to duplicate control number."]
+        
     # Validate dates
     date_fields = {
         "Date of Birth": 'date_of_birth_entry',
         "Date Issued": 'date_issued_entry'
     }
-
     for label, key in date_fields.items():
         value = Filling[key].get().strip()
         try:
-            datetime.strptime(value, "%m/%d/%Y")  # Use desired format
+            datetime.strptime(value, "%m/%d/%Y")
         except ValueError:
             errors.append(f"{label} must be in MM/DD/YYYY format.")
 
@@ -28,7 +42,6 @@ def validate_inputs():
         "Road Rule Pts": 'road_rule_entry',
         "Road Sign Pts": 'road_sign_entry'
     }
-
     for label, key in numeric_fields.items():
         value = Filling[key].get().strip()
         if not value.isdigit() or not (0 <= int(value) <= 100):
@@ -73,6 +86,13 @@ def on_submit():
             back_end.save_next_number('counter.txt', int(Filling['control_number'].get().split()[1]))
             back_end.generate_doc(Filling)
             messagebox.showinfo("Success", "Document generated successfully!")
+            # Refresh the form
+            for widget in Filling.values():
+                if hasattr(widget, 'delete'):
+                    widget.delete(0, tk.END)
+            new_number = "DEE " + back_end.digit_control(back_end.load_current_number("counter.txt"))
+            Filling['control_number'].delete(0, tk.END)
+            Filling['control_number'].insert(0, new_number)
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {str(e)}")
 
@@ -200,7 +220,7 @@ def launch_form_input(form_input_frame):
     Filling.update(checkbox_options)
 
     # Submit button
-    generate_button = ttk.Button(scrollable_frame, text="Generate Document", style="Accent.TButton", command=on_submit)
+    generate_button = ttk.Button(scrollable_frame, text="Generate Document", style="Accent.TButton", command=lambda: on_submit())
     generate_button.grid(row=99, column=0, columnspan=2, pady=10, sticky="n")
 
     # Enable mousewheel scrolling

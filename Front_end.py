@@ -91,4 +91,8 @@ ttk.Button(button_frame, text="Start New Form", style="Accent.TButton", width=20
 
 ttk.Button(button_frame, text="View History", width=20,
            command=lambda: frame_transit('history', root)).grid(row=2, column=0, columnspan=2, pady=5)
+
+ttk.Button(button_frame,text="Change Output Location", width=20,
+            command=lambda: back_end.change_output_location()).grid(row=3, column=0, columnspan=2, pady=5)
+
 root.mainloop()

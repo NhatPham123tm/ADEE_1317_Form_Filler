@@ -89,6 +89,32 @@ def get_today_submissions():
     conn.close()
     return rows
 
+def is_control_number_exists(control_number):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM submissions WHERE control_number = ?", (control_number,))
+    exists = cursor.fetchone()[0] > 0
+    conn.close()
+    return exists
+
+def get_latest_number():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT control_number FROM submissions")
+    rows = cursor.fetchall()
+    conn.close()
+
+    max_number = 0
+    for row in rows:
+        cn = row[0]
+        try:
+            num = int(cn.split()[1])
+            max_number = max(max_number, num)
+        except (IndexError, ValueError):
+            continue  # skip malformed control numbers
+
+    return max_number
+
 def get_current_month_submission_count():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()

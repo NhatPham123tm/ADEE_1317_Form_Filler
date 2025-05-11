@@ -1,4 +1,4 @@
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, filedialog, Tk
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from pypdf import PdfReader, PdfWriter
@@ -7,6 +7,10 @@ import os
 import sqlite3
 from datetime import datetime
 import webbrowser
+import json
+
+CONFIG_PATH = "config.json"
+
 def digit_control(counter):
     return str(counter).zfill(8)
 
@@ -93,24 +97,48 @@ def merge_overlay(template_pdf_path, output_pdf_path, overlay_data):
     with open(output_pdf_path, "wb") as f:
         writer.write(f)
 
-def get_output_path(filling):
-    # Generate timestamp-based folder
-    now = datetime.now()
-    month_folder = now.strftime("%Y-%m")  # e.g. 2025-05
-    day_folder = now.strftime("%d")       # e.g. 08
+def get_output_base_folder(force_change=False):
+    if not force_change and os.path.exists(CONFIG_PATH):
+        with open(CONFIG_PATH, "r") as f:
+            config = json.load(f)
+            if "output_folder" in config and os.path.isdir(config["output_folder"]):
+                return config["output_folder"]
 
-    # Create folder path
-    output_dir = os.path.join("output", month_folder, day_folder)
+    # Prompt user to select a folder
+    root = Tk()
+    root.withdraw()
+    folder = filedialog.askdirectory(title="Select Output Folder")
+    root.destroy()
+
+    if folder:
+        with open(CONFIG_PATH, "w") as f:
+            json.dump({"output_folder": folder}, f)
+        return folder
+    else:
+        return "output"  # fallback
+
+def change_output_location():
+    new_folder = get_output_base_folder(force_change=True)
+    if os.path.isdir(new_folder):
+        messagebox.showinfo("Output Folder Updated", f"New output folder:\n{new_folder}")
+    else:
+        messagebox.showwarning("Folder Not Changed", "Output folder selection was cancelled.")
+        
+def get_output_path(filling):
+    now = datetime.now()
+    base_output = get_output_base_folder()
+    month_folder = now.strftime("%Y-%m")
+    day_folder = now.strftime("%d")
+    output_dir = os.path.join(base_output, month_folder, day_folder)
     os.makedirs(output_dir, exist_ok=True)
 
-    # Build filename from extracted values
+    # Build filename
     first = get_val(filling, "first_name_entry")
     last = get_val(filling, "last_name_entry")
     control = get_val(filling, "control_number")
 
     filename = f"{first}_{last}_{control}".strip().replace(" ", "_") or "output"
-    output_path = os.path.join(output_dir, f"{filename}.pdf")
-    return output_path
+    return os.path.join(output_dir, f"{filename}.pdf")
 
 def generate_doc(filling, form_id=None):
     counter_file = 'counter.txt'
