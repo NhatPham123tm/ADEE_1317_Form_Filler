@@ -73,6 +73,22 @@ def get_all_submissions():
     conn.close()
     return rows
 
+def get_today_submissions():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    today = datetime.now().strftime("%Y-%m-%d")
+    cursor.execute("""
+        SELECT id, control_number, first_name, last_name, middle_name,
+               date_of_birth, classroom_date, online_date, road_rule, road_sign,
+               school_name, tdlr, educator_number, date_issued, generated_at
+        FROM submissions
+        WHERE DATE(generated_at) = ?
+        ORDER BY datetime(generated_at) DESC
+    """, (today,))
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
 def get_current_month_submission_count():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()

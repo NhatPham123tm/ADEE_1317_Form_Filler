@@ -30,14 +30,17 @@ def spaced_date(date_str):
         pass
     return date_str
 
+# get value from filling which can be a string or a tkinter variable
 def get_val(filling, key):
     value = filling.get(key)
     return value.get() if hasattr(value, 'get') else value
 
+# draw checkbox
 def draw_checkbox(c, x, y, checked):
     if checked:
         c.drawString(x, y, "X")  
 
+# create drawing layer
 def create_overlay(data):
     packet = BytesIO()
     c = canvas.Canvas(packet, pagesize=letter)
@@ -169,3 +172,60 @@ def generate_pdf_by_id(form_id):
     ]
     data = dict(zip(fields, row))
     generate_doc(data, form_id=form_id)
+
+def export_records_to_pdf(records, filename_prefix="records"):
+    if not records:
+        return
+
+    now = datetime.now()
+    output_dir = os.path.join("output", now.strftime("%Y-%m"), now.strftime("%d"))
+    os.makedirs(output_dir, exist_ok=True)
+    
+    file_path = os.path.join(output_dir, f"{filename_prefix}_{now.strftime('%H%M%S')}.pdf")
+
+    c = canvas.Canvas(file_path, pagesize=letter)
+    width, height = letter
+    margin = 40
+    y = height - margin
+
+    # Draw Title
+    title = f"Record Report - {now.strftime('%B %d, %Y')}"
+    c.setFont("Helvetica-Bold", 14)
+    c.drawCentredString(width / 2, y, title)
+
+    y -= 30  # space below title
+
+    headers = [
+        "ID", "Control #", "First", "Last", "Middle", "DOB", "Classroom", "Online",
+        "Rule", "Sign", "School", "TDLR", "Educator", "Issued", "Generated"
+    ]
+
+    # Draw headers
+    c.setFont("Helvetica-Bold", 9)
+    for i, header in enumerate(headers):
+        c.drawString(margin + i * 70, y, header)
+
+    y -= 20
+    c.setFont("Helvetica", 8)
+
+    for row in records:
+        if y < margin + 30:
+            c.showPage()
+            y = height - margin
+            # Repeat title on new page
+            c.setFont("Helvetica-Bold", 14)
+            c.drawCentredString(width / 2, y, title)
+            y -= 30
+            c.setFont("Helvetica-Bold", 9)
+            for i, header in enumerate(headers):
+                c.drawString(margin + i * 70, y, header)
+            y -= 20
+            c.setFont("Helvetica", 8)
+
+        for i, cell in enumerate(row):
+            text = str(cell)
+            c.drawString(margin + i * 70, y, text[:12])  # truncate long values
+        y -= 15
+
+    c.save()
+    return file_path
