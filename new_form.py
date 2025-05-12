@@ -53,10 +53,15 @@ def on_submit():
     validation_errors = validate_inputs()
     if validation_errors:
         messagebox.showerror("Input Error", "\n".join(validation_errors))
-    else:
-        try:
-            # Save to DB
-            database.save_submission({
+        return
+
+    conn = database.get_connection()
+    try:
+        # Transaction
+        cursor = conn.cursor()
+
+        # Prepare data
+        data = {
             "control_number": Filling['control_number'].get(),
             "first_name": Filling['first_name_entry'].get(),
             "last_name": Filling['last_name_entry'].get(),
@@ -70,8 +75,6 @@ def on_submit():
             "tdlr": Filling['TDLR_entry'].get(),
             "educator_number": Filling['driver_school_number_entry'].get(),
             "date_issued": Filling['date_issued_entry'].get(),
-
-            # Checkbox values (convert bool to int)
             "male": int(Filling["Male"].get()),
             "female": int(Filling["Female"].get()),
             "driver_ed": int(Filling['driver_ed'].get()),
@@ -82,19 +85,33 @@ def on_submit():
             "college": int(Filling['college'].get()),
             "at_dps": int(Filling['At_DPS'].get()),
             "vision_exam": int(Filling['Vision_examination'].get())
-        })
-            back_end.save_next_number('counter.txt', int(Filling['control_number'].get().split()[1]))
-            back_end.generate_doc(Filling)
-            messagebox.showinfo("Success", "Document generated successfully!")
-            # Refresh the form
-            for widget in Filling.values():
-                if hasattr(widget, 'delete'):
-                    widget.delete(0, tk.END)
-            new_number = "DEE " + back_end.digit_control(back_end.load_current_number("counter.txt"))
-            Filling['control_number'].delete(0, tk.END)
-            Filling['control_number'].insert(0, new_number)
-        except Exception as e:
-            messagebox.showerror("Error", f"An error occurred: {str(e)}")
+        }
+
+        # Save submission but do not commit yet
+        database.save_submission(data, conn=conn, cursor=cursor)
+
+        # Generate PDF
+        back_end.generate_doc(Filling)
+
+        # Commit if everything is successful
+        conn.commit()
+        back_end.save_next_number('counter.txt', int(Filling['control_number'].get().split()[1]) + 1)
+
+        messagebox.showinfo("Success", "Document generated and saved successfully!")
+
+        # Reset form fields
+        for widget in Filling.values():
+            if hasattr(widget, 'delete'):
+                widget.delete(0, tk.END)
+        new_number = "DEE " + back_end.digit_control(back_end.load_current_number("counter.txt"))
+        Filling['control_number'].delete(0, tk.END)
+        Filling['control_number'].insert(0, new_number)
+
+    except Exception as e:
+        conn.rollback()
+        messagebox.showerror("Error", f"An error occurred: {str(e)}")
+    finally:
+        conn.close()
 
 # function to create label+entry
 def create_entry(label, row, field_key, default_text="", parent_frame=None):
@@ -119,6 +136,17 @@ def launch_form_input(form_input_frame):
     )
 
     canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    # Create the window inside the canvas and keep a reference
+    canvas_window = canvas.create_window((0, 0), window=scrollable_frame, anchor="n")
+
+    def center_scrollable_frame(event):
+        canvas_width = event.width
+        frame_width = scrollable_frame.winfo_reqwidth()
+        x = max((canvas_width - frame_width) // 2, 0)
+        canvas.coords(canvas_window, x, 0)  # Update x position to center
+
+    canvas.bind("<Configure>", center_scrollable_frame)
+
     canvas.configure(yscrollcommand=scrollbar.set)
 
     canvas.grid(row=0, column=0, sticky="nsew")
@@ -221,7 +249,7 @@ def launch_form_input(form_input_frame):
 
     # Submit button
     generate_button = ttk.Button(scrollable_frame, text="Generate Document", style="Accent.TButton", command=lambda: on_submit())
-    generate_button.grid(row=99, column=0, columnspan=2, pady=10, sticky="n")
+    generate_button.grid(row=99, column=0, columnspan=2, pady=10, sticky="ew")
 
     # Enable mousewheel scrolling
     def _on_mousewheel(event):

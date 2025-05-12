@@ -175,8 +175,7 @@ def generate_doc(filling, form_id=None):
 
     merge_overlay(template_path, output_path, overlay_data)
 
-    if not form_id:
-        save_next_number(counter_file, current_number + 1)
+    save_next_number(counter_file, current_number + 1)
 
     messagebox.showinfo("Success", f"PDF generated and saved to:\n{output_path}")
     webbrowser.open(output_path)

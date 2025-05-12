@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import messagebox
 import back_end
 from datetime import datetime
+
 def treeview_sort_column(tv, col, reverse):
     data_list = [(tv.set(k, col), k) for k in tv.get_children('')]
 
@@ -51,23 +52,25 @@ def launch_history_viewer(history_frame):
         today_tree.insert("", "end", values=row)
     today_tree.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
+    # Todat tab scroll
     today_scroll_y = ttk.Scrollbar(tab_today, orient="vertical", command=today_tree.yview)
     today_tree.configure(yscrollcommand=today_scroll_y.set)
     today_scroll_y.grid(row=0, column=1, sticky="ns", pady=10)
-
-    tab_today.grid_rowconfigure(0, weight=1)
-    tab_today.grid_columnconfigure(0, weight=1)
+    today_scroll_x = ttk.Scrollbar(tab_today, orient="horizontal", command=today_tree.xview)
+    today_tree.configure(xscrollcommand=today_scroll_x.set)
+    today_scroll_x.grid(row=1, column=0, columnspan=2, sticky="ew")
 
     # --- Tab 2: All Submissions with Search ---
     tab_all = ttk.Frame(notebook)
     notebook.add(tab_all, text="All Submissions")
 
+    # Search bar
+    search_frame = ttk.Frame(tab_all)
+    search_frame.grid(row=0, column=0, columnspan=2, sticky="ew", padx=10, pady=(5, 0))
+
     name_var = tk.StringVar()
     month_var = tk.StringVar()
     year_var = tk.StringVar()
-
-    search_frame = ttk.Frame(tab_all)
-    search_frame.grid(row=0, column=0, columnspan=2, sticky="ew", padx=10, pady=(5, 0))
 
     ttk.Label(search_frame, text="Name:").grid(row=0, column=0, padx=5)
     ttk.Entry(search_frame, textvariable=name_var, width=20).grid(row=0, column=1, padx=5)
@@ -88,17 +91,28 @@ def launch_history_viewer(history_frame):
 
     ttk.Button(search_frame, text="Search", style="Accent.TButton", command=perform_search).grid(row=0, column=6, padx=10)
 
-    tree = ttk.Treeview(tab_all, columns=columns, show='headings')
+    # Frame to hold Treeview and its scrollbars
+    tree_container = ttk.Frame(tab_all)
+    tree_container.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=10, pady=(5, 5))
+    tree_container.grid_rowconfigure(0, weight=1)
+    tree_container.grid_columnconfigure(0, weight=1)
+
+    tree = ttk.Treeview(tree_container, columns=columns, show='headings')
     for col in columns:
         tree.heading(col, text=col, command=lambda _col=col: treeview_sort_column(tree, _col, False))
         tree.column(col, anchor="center", width=100)
     for row in records:
         tree.insert("", "end", values=row)
-    tree.grid(row=1, column=0, sticky="nsew", padx=(10, 0), pady=(5, 5))
+    tree.grid(row=0, column=0, sticky="nsew")
 
-    scroll_y = ttk.Scrollbar(tab_all, orient="vertical", command=tree.yview)
+    #For tab all scroll
+    scroll_y = ttk.Scrollbar(tree_container, orient="vertical", command=tree.yview)
     tree.configure(yscrollcommand=scroll_y.set)
-    scroll_y.grid(row=1, column=1, sticky="ns", pady=10)
+    scroll_y.grid(row=0, column=1, sticky="ns")
+
+    scroll_x = ttk.Scrollbar(tree_container, orient="horizontal", command=tree.xview)
+    tree.configure(xscrollcommand=scroll_x.set)
+    scroll_x.grid(row=1, column=0, columnspan=2, sticky="ew")
 
     def print_selected_from_active_tab():
         active_tab = notebook.index(notebook.select())
@@ -150,11 +164,18 @@ def launch_history_viewer(history_frame):
     print_combined_btn = ttk.Button(history_frame, text="Export Tab Records to PDF", style="Accent.TButton", command=print_all_records_to_pdf)
     print_combined_btn.grid(row=3, column=0, sticky="ew", padx=10, pady=(0, 10))
 
-    # Configure grid weights
-    for i in [0, 1, 2]:
-        tab_all.grid_rowconfigure(i, weight=1)
+    history_frame.grid_rowconfigure(0, weight=1)
+    history_frame.grid_columnconfigure(0, weight=1)
+    tab_all.grid_rowconfigure(1, weight=1)  # For tree_frame
     tab_all.grid_columnconfigure(0, weight=1)
+    tab_all.grid_rowconfigure(2, weight=0)
+
+    tab_today.grid_rowconfigure(1, weight=0)
+    tab_today.grid_rowconfigure(0, weight=1)
+    tab_today.grid_columnconfigure(0, weight=1)
+
+    notebook.grid_rowconfigure(0, weight=1)
+    notebook.grid_columnconfigure(0, weight=1)
 
     history_frame.grid_rowconfigure(0, weight=1)
     history_frame.grid_columnconfigure(0, weight=1)
-

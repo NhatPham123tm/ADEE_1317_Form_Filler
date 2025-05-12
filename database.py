@@ -1,5 +1,7 @@
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
 DB_NAME = "submissions.db"
 
 def init_db():
@@ -38,26 +40,39 @@ def init_db():
     conn.commit()
     conn.close()
 
-def save_submission(data):
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
+def get_connection():
+    return sqlite3.connect(DB_NAME)
+
+def save_submission(data, conn=None, cursor=None):
+    internal = False
+    if conn is None or cursor is None:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        internal = True
+
+    # Get current Central Time (DST-aware)
+    central_now = datetime.now(ZoneInfo("America/Chicago")).replace(tzinfo=None)
+
     cursor.execute("""
-    INSERT INTO submissions (
-        control_number, first_name, last_name, middle_name, male, female, date_of_birth,
-        classroom_date, online_date, road_rule, road_sign,
-        school_name, tdlr, educator_number, date_issued,
-        driver_ed, private_school, duplicate, public_school,
-        service_center, college, at_dps, vision_exam
-    ) VALUES (?,?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO submissions (
+            control_number, first_name, last_name, middle_name, date_of_birth,
+            classroom_date, online_date, road_rule, road_sign, school_name, 
+            tdlr, educator_number, date_issued, male, female,
+            driver_ed, private_school, duplicate, public_school,
+            service_center, college, at_dps, vision_exam, generated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
-        data["control_number"], data["first_name"], data["last_name"], data["middle_name"],int(data["male"]), int(data["female"]), data["date_of_birth"],
-        data["classroom_date"], data["online_date"], int(data["road_rule"]), int(data["road_sign"]),
-        data["school_name"], data["tdlr"], data["educator_number"], data["date_issued"],
-        int(data["driver_ed"]), int(data["private_school"]), int(data["duplicate"]), int(data["public_school"]),
-        int(data["service_center"]), int(data["college"]), int(data["at_dps"]), int(data["vision_exam"])
+        data["control_number"], data["first_name"], data["last_name"], data["middle_name"], data["date_of_birth"],
+        data["classroom_date"], data["online_date"], data["road_rule"], data["road_sign"], data["school_name"],
+        data["tdlr"], data["educator_number"], data["date_issued"], data["male"], data["female"],
+        data["driver_ed"], data["private_school"], data["duplicate"], data["public_school"],
+        data["service_center"], data["college"], data["at_dps"], data["vision_exam"],
+        central_now.isoformat()
     ))
-    conn.commit()
-    conn.close()
+
+    if internal:
+        conn.commit()
+        conn.close()
 
 def get_all_submissions():
     conn = sqlite3.connect(DB_NAME)
@@ -76,15 +91,19 @@ def get_all_submissions():
 def get_today_submissions():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    today = datetime.now().strftime("%Y-%m-%d")
+
+    today = datetime.now().date()
+    tomorrow = today + timedelta(days=1)
+
     cursor.execute("""
         SELECT id, control_number, first_name, last_name, middle_name,
                date_of_birth, classroom_date, online_date, road_rule, road_sign,
                school_name, tdlr, educator_number, date_issued, generated_at
         FROM submissions
-        WHERE DATE(generated_at) = ?
+        WHERE generated_at >= ? AND generated_at < ?
         ORDER BY datetime(generated_at) DESC
-    """, (today,))
+    """, (today.isoformat(), tomorrow.isoformat()))
+
     rows = cursor.fetchall()
     conn.close()
     return rows

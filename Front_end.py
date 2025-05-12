@@ -2,7 +2,16 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import datetime
 import back_end, database, history_viewer, new_form
+import sys
+import os
 
+def resource_path(relative_path):
+    """ Get absolute path to resource for dev and for PyInstaller """
+    try:
+        base_path = sys._MEIPASS  # PyInstaller temp folder
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 def frame_transit(option, root):
     landing_frame.grid_forget()
@@ -30,7 +39,7 @@ database.init_db()
 
 # --- Setup Main Window ---
 root = tk.Tk()
-root.tk.call("source", "theme/azure.tcl")
+root.tk.call("source", resource_path("theme/azure.tcl"))
 root.tk.call("set_theme", "light")
 root.title("Document Filler")
 root.geometry("850x980")
