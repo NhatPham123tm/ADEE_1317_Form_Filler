@@ -21,17 +21,17 @@ This is a desktop application that helps educators fill and generate ADEE-1317 T
 
 ## File Structure  
 .
-├── Front_end.py                # Main GUI launcher
-├── back_end.py                 # PDF generation, utility functions
-├── database.py                 # SQLite DB setup and logic
-├── Template/
-│   └── ADEE-1317-texas-adult-driver-education-certificate-template.pdf
-├── theme/
-│   ├── azure.tcl
-│   ├── midnight.json
-│   └── light/                 # Optional image assets or additional styles
-├── counter.txt                # Tracks current control number
-└── output/                    # Stores generated PDFs (organized by date)
+├── Front_end.py                # Main GUI launcher  
+├── back_end.py                 # PDF generation, utility functions  
+├── database.py                 # SQLite DB setup and logic  
+├── Template/  
+│   └── ADEE-1317-texas-adult-driver-education-certificate-template.pdf  
+├── theme/  
+│   ├── azure.tcl  
+│   ├── midnight.json  
+│   └── light/                 # Optional image assets or additional styles  
+├── counter.txt                # Tracks current control number  
+└── output/                    # Stores generated PDFs (organized by date)  
 
 ## Usage  
 - Unzip the release zip into your folder choice which include Template folder and exe file  
